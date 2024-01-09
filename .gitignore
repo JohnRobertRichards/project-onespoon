@@ -1,0 +1,32 @@
+# Node.js
+node_modules/
+npm-debug.log
+
+# Express
+*.pid
+*.log
+
+# macOS
+.DS_Store
+
+# VSCode
+.vscode/
+*.code-workspace
+
+# Logs
+logs/
+*.log
+
+# Local environment variables
+.env
+.env.local
+
+# Dependency directories
+/jspm_packages/
+/package-lock.json
+
+# Sass
+.sass-cache/
+
+# Compiled binary addons (http://nodejs.org/api/addons.html)
+/build/Release
