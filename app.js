@@ -1,51 +1,36 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const cheerio = require('cheerio');
+const axios = require('axios');
 
 const app = express();
 const port = 3000;
 
-// 리스너
-app.listen(port, () => {
-    console.log(`Example app listening on port ${port}`);
-})
+app.get('/test', (request, response) => {
+    
+    axios.get("https://www.saramin.co.kr/zf_user/search?search_area=main&search_done=y&search_optional_item=n&searchType=search&searchword=%EC%9E%AC%ED%83%9D%20%EA%B0%9C%EB%B0%9C", {
+        headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        }
+    }).then(httpResponse => {
+        const $ = cheerio.load(httpResponse.data);
+        
+        const recruits = $('.item_recruit .area_job h2 a').toArray();
+        const recruitNames = new Array();
 
-app.get('/', (req, res) => {
-    res.send('Hello World!');
-})
-
-// db연동예제
-app.get('/testsave', (req, res) => {
-    // DB 연결
-    const dbURI = 'mongodb://localhost:27017/test';
-    mongoose.connect(dbURI, { useNewUrlParser: true, useUnifiedTopology: true });
-    const db = mongoose.connection;
-    db.on('error', console.error.bind(console, 'MongoDB 연결 오류:'));
-    db.once('open', () => {
-        console.log('MongoDB에 연결되었습니다.');
-    });
-
-    // 예제 데이터베이스 모델 정의
-    const Schema = mongoose.Schema;
-    const exampleSchema = new Schema({
-        name: String,
-        age: Number
-    });
-
-    const ExampleModel = mongoose.model('Example', exampleSchema);
-
-    // 예제 데이터베이스에 데이터 추가
-    const exampleData = new ExampleModel({ name: 'John Doe', age: 25 });
-    exampleData.save()
-        .then(savedDocument => {
-            console.log('문서가 저장되었습니다:', savedDocument);
-        })
-        .catch(error => {
-            console.error('문서 저장 중 오류 발생:', error);
+        recruits.map(recruit => {
+            const $ = cheerio.load(recruit);
+            recruitNames.push($("span").text());
         });
 
-    res.send('저장되었습니다');
+        response.status(200).json({
+            data: {
+                'recruitNames': recruitNames,
+            },
+        });
+    }).catch(error => {
+        console.error(error);
+    });
 });
 
-
-
-
+app.listen(port);
